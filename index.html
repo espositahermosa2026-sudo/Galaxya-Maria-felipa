@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Mamá Maria Felipa - Mi Corazón</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0612; overflow:hidden; font-family:'Poppins',sans-serif; height:100vh; width:100vw;}
+#canvas{position:fixed; top:0; left:0; width:100%; height:100%;}
+#ui{position:fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; z-index:10;}
+.glass{pointer-events:auto; background:rgba(255,255,255,0.08); backdrop-filter:blur(15px); border:1px solid rgba(255,182,193,0.2); border-radius:24px; padding:32px 28px; text-align:center; max-width:380px; width:90%; box-shadow:0 8px 32px rgba(255,105,180,0.3);}
+h1{font-family:'Dancing Script',cursive; font-size:2.2rem; color:#ffb6d9; text-shadow:0 0 20px #ff69b4; line-height:1.2; margin-bottom:8px;}
+h1 span{color:#fff; display:block; font-size:2.6rem;}
+.mensaje{color:#ffd1e6; font-size:0.95rem; line-height:1.6; margin:16px 0; font-weight:300;}
+.nombre{font-family:'Dancing Script',cursive; font-size:1.8rem; color:#ff8ac1; margin-top:8px;}
+.btn{margin-top:20px; background:linear-gradient(135deg,#ff69b4,#ff1493); color:white; border:none; padding:12px 28px; border-radius:50px; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 20px rgba(255,105,180,0.5); transition:0.3s; font-family:'Poppins',sans-serif;}
+.btn:hover{transform:scale(1.05);}
+#playHint{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,0.6); font-size:0.8rem; z-index:20; background:rgba(0,0,0,0.5); padding:6px 14px; border-radius:20px;}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="ui">
+<div class="glass">
+<h1>Para ti Mamá <span>Maria Felipa</span></h1>
+<p class="mensaje">Mamá, tú eres el primer amor que conocí, mi refugio y mi fuerza. Cada flor de este corazón es un gracias por tus desvelos, tus abrazos y tu amor infinito. Este universo es pequeño comparado con lo que te amo. Eres mi vida entera.</p>
+<div class="nombre">Hernández Hernández 💖</div>
+<button class="btn" id="musicBtn">🎵 Toca aquí para tu canción</button>
+</div>
+</div>
+<div id="playHint">Toca la pantalla para ver la magia 🌸</div>
+<audio id="audio" loop preload="auto" src="https://files.catbox.moe/gd8gz8.m4a"></audio>
+<script>
+const canvas=document.getElementById('canvas');const ctx=canvas.getContext('2d');const audio=document.getElementById('audio');const btn=document.getElementById('musicBtn');const hint=document.getElementById('playHint');let w,h,particles=[],roses=[],time=0;let audioPlaying=false;
+function resize(){w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight;}window.addEventListener('resize',resize); resize();
+for(let i=0;i<300;i++){particles.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*1.5+0.2, c:Math.random()>0.5?'#ffb6d9':'#ff69b4', vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, a:Math.random()*0.8+0.2})}
+function heartPos(t, scale){let x=16*Math.pow(Math.sin(t),3);let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));return{x:x*scale, y:y*scale}}
+const heartPoints=[];for(let i=0;i<80;i++){let t=(i/80)*Math.PI*2;let p=heartPos(t,14);heartPoints.push({hx:p.x, hy:p.y, delay:i*0.05})}
+heartPoints.forEach((hp,idx)=>{let count=3+Math.floor(Math.random()*2);for(let j=0;j<count;j++){roses.push({baseX:hp.hx, baseY:hp.hy,x:(Math.random()-0.5)*w,y:(Math.random()-0.5)*h+h,tx:hp.hx+(Math.random()-0.5)*22,ty:hp.hy+(Math.random()-0.5)*22,size:8+Math.random()*7,speed:0.02+Math.random()*0.03,phase:Math.random()*Math.PI*2,delay:hp.delay+Math.random()*1.5,petalColor:j==0?'#ff2e7d':'#ff8abf',arrived:false})}});
+function drawRose(x,y,size,petalColor){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(time*0.001+x)*0.2);ctx.strokeStyle='#3a9d23';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,size*0.8);ctx.lineTo(0,size*1.6);ctx.stroke();for(let i=0;i<5;i++){ctx.fillStyle=petalColor;ctx.beginPath();ctx.rotate((Math.PI*2)/5);ctx.ellipse(0,-size*0.3,size*0.5,size*0.7,0,0,Math.PI*2);ctx.fill();}ctx.fillStyle='#ffebf3';ctx.beginPath();ctx.arc(0,0,size*0.25,0,Math.PI*2);ctx.fill();ctx.restore();}
+function animate(){time+=16;ctx.fillStyle='rgba(10,6,18,0.25)';ctx.fillRect(0,0,w,h);particles.forEach(p=>{p.x+=p.vx; p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;ctx.fillStyle=p.c;ctx.globalAlpha=p.a*(0.7+Math.sin(time*0.002+p.x)*0.3);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;let cx=w/2,cy=h/2-30;roses.forEach(r=>{if(time*0.001>r.delay){r.x+=(cx+r.tx-r.x)*r.speed;r.y+=(cy+r.ty-r.y)*r.speed;r.arrived=true;}else{r.y+=Math.sin(time*0.003+r.phase)*0.5;}drawRose(r.x,r.y,r.size,r.petalColor);if(r.arrived){ctx.fillStyle='rgba(255,182,217,0.4)';ctx.beginPath();ctx.arc(r.x,r.y,2,0,Math.PI*2);ctx.fill();}});let beat=1+Math.sin(time*0.004)*0.04;ctx.save();ctx.translate(cx,cy);ctx.scale(beat,beat);ctx.strokeStyle='rgba(255,105,180,0.25)';ctx.lineWidth=2;ctx.beginPath();for(let t=0;t<Math.PI*2;t+=0.05){let p=heartPos(t,14);if(t==0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);}ctx.closePath();ctx.stroke();ctx.restore();requestAnimationFrame(animate);}animate();
+function toggleAudio(){if(audioPlaying){audio.pause();audioPlaying=false;btn.textContent='🎵 Toca aquí para tu canción';}else{audio.play().then(()=>{audioPlaying=true;btn.textContent='⏸️ Pausar canción';hint.style.display='none';})}}btn.addEventListener('click',toggleAudio);document.body.addEventListener('click',(e)=>{if(e.target!==btn && !audioPlaying){toggleAudio();}},{once:true});
+</script>
+</body>
+</html>
